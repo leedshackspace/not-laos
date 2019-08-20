@@ -13,7 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements INubSelect {
 
 	/**
 	 * 
@@ -53,7 +53,7 @@ public class MainFrame extends JFrame {
 		gbl_contentPane.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
-		FilesPanel filePanel = new FilesPanel(new File("C:\\Users\\benob\\Documents\\not-laos\\test\\"));
+		filePanel = new FilesPanel(new File("C:\\Users\\benob\\Documents\\not-laos\\test\\"));
 		GridBagConstraints gbc_filePanel = new GridBagConstraints();
 		gbc_filePanel.fill = GridBagConstraints.VERTICAL;
 		gbc_filePanel.anchor = GridBagConstraints.WEST;
@@ -89,6 +89,29 @@ public class MainFrame extends JFrame {
 	@Override
 	public void paintComponents(Graphics g) {
 		super.paintComponents(g);
+	}
+	
+	boolean selected = false;
+	int highlighted = 0;
+	private FilesPanel filePanel;
+	
+	@Override
+	public void HandleCommand(NubCommand nc) {
+		switch (highlighted) {
+		case 0: //Files
+			if (selected) {
+				filePanel.HandleCommand(nc);
+				if (nc == NubCommand.Click) {
+					selected = false;
+				}
+			}
+			switch (nc) {
+			case Click:
+				selected = true;
+				break;
+			}
+		}
+		
 	}
 
 }

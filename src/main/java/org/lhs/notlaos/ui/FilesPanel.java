@@ -28,7 +28,7 @@ import javax.swing.JPanel;
  * @author jediminer543
  *
  */
-public class FilesPanel extends JPanel {
+public class FilesPanel extends JPanel implements INubSelect {
 
 	/**
 	 * 
@@ -64,6 +64,7 @@ public class FilesPanel extends JPanel {
 	
 	int tgtIndex = 0;
 	boolean selected = false;
+	int highlight = 0;
 	
 	/**
 	 * Move selection cursor up
@@ -78,6 +79,16 @@ public class FilesPanel extends JPanel {
 	 */
 	public void down() {
 		tgtIndex = Math.max(tgtIndex-1, 0);
+		repaint();
+	}
+	
+	public void select() {
+		selected = !selected; 
+		repaint();
+	}
+	
+	public void highlight(int highlight) {
+		highlight = highlight;
 		repaint();
 	}
 	
@@ -110,7 +121,14 @@ public class FilesPanel extends JPanel {
 				
 		g2.setColor(UIGlobals.L2BG);
 		g2.fillRoundRect(5, 5, this.getWidth()-10, this.getHeight()-10, 5, 5);
-		g2.setColor(UIGlobals.NormFG);
+		if (highlight == 1) {
+			g2.setColor(UIGlobals.TrimFG);
+		} else if (highlight == 2) {
+			g2.setColor(UIGlobals.SelFG);
+		} else {
+			g2.setColor(UIGlobals.NormFG);
+		}
+		
 		g2.drawRoundRect(5, 5, this.getWidth()-10, this.getHeight()-10, 5, 5);
 		
 		g2.clip(new RoundRectangle2D.Float(5, 5, this.getWidth()-10, this.getHeight()-10, 5, 5));
@@ -124,7 +142,7 @@ public class FilesPanel extends JPanel {
 				continue;
 			}
 			//Draw boundaries
-			g.setColor(index == tgtIndex ? UIGlobals.TrimFG : UIGlobals.NormFG);
+			g.setColor(index == tgtIndex ? (selected ? UIGlobals.SelFG : UIGlobals.TrimFG) : UIGlobals.NormFG);
 			//Set clip
 			Shape clip = g.getClip();
 			//Draw internals
@@ -160,6 +178,21 @@ public class FilesPanel extends JPanel {
 		g.drawString(f.getName(), 10, 10+g.getFontMetrics().getHeight());
 		g.setFont(g.getFont().deriveFont(0));
 		g.drawString(new Date(f.lastModified()).toInstant().toString(), 10, 15+2*g.getFontMetrics().getHeight());
+	}
+
+	@Override
+	public void HandleCommand(NubCommand nc) {
+		switch (nc) {
+		case Up:
+			up();
+			break;
+		case Down:
+			down();
+			break;
+		case Click:
+			select();
+			break;
+		}
 	}
 
 }

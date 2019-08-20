@@ -16,5 +16,6 @@ public class UIGlobals {
 	public static Color L2BG = Color.WHITE;
 	public static Color NormFG = Color.BLACK;
 	public static Color TrimFG = new Color(0x6194BC);
+	public static Color SelFG = Color.GREEN;
 	
 }

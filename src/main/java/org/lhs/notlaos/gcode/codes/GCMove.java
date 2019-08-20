@@ -46,6 +46,22 @@ public class GCMove implements IGCCommand {
 		this.feed = f;
 	}
 	
+	public Double getX() {
+		return x;
+	}
+	
+	public Double getY() {
+		return y;
+	}
+	
+	public Double getZ() {
+		return z;
+	}
+	
+	public Double getF() {
+		return feed;
+	}
+	
 	@Override
 	public String toString() {
 		return (interpolate ? "G1 " : "G0 ") 

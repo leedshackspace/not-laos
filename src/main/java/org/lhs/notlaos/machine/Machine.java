@@ -1,4 +1,4 @@
-package org.lhs.notlaos;
+package org.lhs.notlaos.machine;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -20,28 +20,6 @@ public class Machine {
 		sp = SerialPort.getCommPort(serial);
 		sp.openPort();
 		sp.setBaudRate(baud);
-		sp.addDataListener(new SerialPortDataListener() {
-			
-			@Override
-			public void serialEvent(SerialPortEvent event) {
-				/*
-				byte[] recv = new byte[event.getSerialPort().bytesAvailable()];
-				event.getSerialPort().readBytes(recv, recv.length);
-				System.out.println(new String(recv));
-				currentLine.append(new String(recv));
-				if (currentLine.toString().contains("\n")) {
-					lastFullLine = currentLine.toString().split("\n", 1)[0];
-					currentLine = new StringBuilder(currentLine.toString().split("\n", 1).length == 2 ? currentLine.toString().split("\n", 1)[1] : "");
-					System.out.println(lastFullLine);
-				}
-				*/
-			}
-			
-			@Override
-			public int getListeningEvents() {
-				return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-			}
-		});
 	}
 	
 	public void sendRaw(String rawCMD) throws IOException {

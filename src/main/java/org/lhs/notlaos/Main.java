@@ -12,6 +12,7 @@ import java.util.List;
 import org.lhs.notlaos.gcode.GCode;
 import org.lhs.notlaos.gcode.GCodeWriter;
 import org.lhs.notlaos.gcode.IGCCommand;
+import org.lhs.notlaos.machine.Machine;
 import org.lhs.notlaos.translation.LGCTranslator;
 import org.lhs.notlaos.translation.server.TFTPServer;
 import org.lhs.notlaos.translation.server.TFTPServer.ServerMode;
