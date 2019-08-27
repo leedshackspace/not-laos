@@ -88,7 +88,7 @@ public class FilesPanel extends JPanel implements INubSelect {
 	}
 	
 	public void highlight(int highlight) {
-		highlight = highlight;
+		this.highlight = highlight;
 		repaint();
 	}
 	
@@ -191,6 +191,8 @@ public class FilesPanel extends JPanel implements INubSelect {
 			break;
 		case Click:
 			select();
+			break;
+		default:
 			break;
 		}
 	}
