@@ -9,8 +9,9 @@ import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JPanel;
 
-public class BoundariesPanel extends JPanel {
-	public BoundariesPanel() {
+public class ButtonPanel extends JPanel {
+	
+	public ButtonPanel() {
 	}
 
 	/**
@@ -56,14 +57,31 @@ public class BoundariesPanel extends JPanel {
 		//Internal Clip
 		g2.clip(new RoundRectangle2D.Float(5, 5, this.getWidth()-10, this.getHeight()-10, 5, 5));
 		
-		int step = (getWidth()-10)/5;
-		
 		//MoveButton
-		g2.drawRoundRect(10+step*0, 10, step, getHeight()-20, 5, 5);
-		g2.drawString("Test", (int)g2.getFontMetrics().getStringBounds("Test", g2).getWidth()/2 + 15+step*0, 25);
-		
+		drawButtons(g2);
 		
 		g.setClip(supclip);
 	}
 	
+	public void drawButtons(Graphics2D g2) {
+		int step = (getWidth()-10)/5;
+		
+		g2.drawRoundRect(10+step*0, 10, step-5, getHeight()-20, 5, 5);
+		g2.drawString("Move", 10 + step*0 + (step-5)/2 - g2.getFontMetrics().stringWidth("Move")/2, 10 + g2.getFontMetrics().getAscent());
+		
+		g2.drawRoundRect(10+step*1, 10, step-5, getHeight()-20, 5, 5);
+		g2.drawString("Set Origin", 10 + step*1 + (step-5)/2 - g2.getFontMetrics().stringWidth("Set Origin")/2, 10 + g2.getFontMetrics().getAscent());
+		
+		g2.drawRoundRect(10+step*2, 10, step*2-5, getHeight()-20, 5, 5);
+		g2.drawString("Origin: Top Left", 10 + step*2 + (step*2-5)/2 - g2.getFontMetrics().stringWidth("Origin: Top Left")/2, 10 + g2.getFontMetrics().getAscent());
+		
+		g2.drawRoundRect(10+step*4, 10, step-5, getHeight()-20, 5, 5);
+		g2.drawString("Save Origin", 10 + step*4 + (step-5)/2 - g2.getFontMetrics().stringWidth("Save Origin")/2, 10 + g2.getFontMetrics().getAscent());
+	}
+	
+	public class Button {
+		int width;
+		String text;
+		
+	}
 }

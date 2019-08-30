@@ -63,7 +63,7 @@ public class MainFrame extends JFrame implements INubSelect {
 		gbc_filePanel.gridy = 0;
 		contentPane.add(filePanel, gbc_filePanel);
 		
-		boundPanel = new BoundariesPanel();
+		boundPanel = new ButtonPanel();
 		GridBagConstraints gbc_boundPanel = new GridBagConstraints();
 		gbc_boundPanel.fill = GridBagConstraints.BOTH;
 		gbc_boundPanel.gridx = 1;
