@@ -8,10 +8,14 @@ import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import org.lhs.notlaos.ui.ButtonPanel.Button;
 
 public class MainFrame extends JFrame implements INubSelect {
 
@@ -42,7 +46,7 @@ public class MainFrame extends JFrame implements INubSelect {
 	 */
 	public MainFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 670, 500);
+		setBounds(100, 100, 1000, 650);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -53,7 +57,7 @@ public class MainFrame extends JFrame implements INubSelect {
 		gbl_contentPane.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
-		filePanel = new FilesPanel(new File("C:\\Users\\benob\\Documents\\not-laos\\test\\"));
+		filePanel = new FilesPanel(new File("GCode/MGC"));
 		GridBagConstraints gbc_filePanel = new GridBagConstraints();
 		gbc_filePanel.gridheight = 2;
 		gbc_filePanel.fill = GridBagConstraints.VERTICAL;
@@ -63,12 +67,27 @@ public class MainFrame extends JFrame implements INubSelect {
 		gbc_filePanel.gridy = 0;
 		contentPane.add(filePanel, gbc_filePanel);
 		
-		boundPanel = new ButtonPanel();
+		
+		List<Button> buttons = new ArrayList<Button>();
+		buttons.add(new Button(2, "Move", () -> System.out.println("Move")));
+		buttons.add(new Button(3, "Set Origin", () -> System.out.println("Set Origin")));
+		buttons.add(new Button(3, "Boundaries", () -> System.out.println("Bounds")));
+		buttons.add(new Button(4, "Origin Mode", null));
+		buttons.add(new Button(3, "Save Origin", null));
+		boundPanel = new ButtonPanel(buttons);
 		GridBagConstraints gbc_boundPanel = new GridBagConstraints();
 		gbc_boundPanel.fill = GridBagConstraints.BOTH;
 		gbc_boundPanel.gridx = 1;
 		gbc_boundPanel.gridy = 1;
 		contentPane.add(boundPanel, gbc_boundPanel);
+		
+		JPanel previewPanel = new JPanel();
+		GridBagConstraints gbc_previewPanel = new GridBagConstraints();
+		gbc_previewPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_previewPanel.fill = GridBagConstraints.BOTH;
+		gbc_previewPanel.gridx = 1;
+		gbc_previewPanel.gridy = 0;
+		contentPane.add(previewPanel, gbc_previewPanel);
 		
 		addKeyListener(new KeyListener() {
 			
@@ -77,16 +96,27 @@ public class MainFrame extends JFrame implements INubSelect {
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
+				new Thread(() -> {
 				// TODO Auto-generated method stub
 				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-					HandleCommand(NubCommand.Up);
+					handleCommand(NubCommand.Down);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_UP) {
-					HandleCommand(NubCommand.Down);
+					handleCommand(NubCommand.Up);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					handleCommand(NubCommand.Left);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					handleCommand(NubCommand.Right);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					HandleCommand(NubCommand.Click);
+					handleCommand(NubCommand.Click);
 				}
+				if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					handleCommand(NubCommand.Deselect);
+				}
+				}).run();
 			}
 			
 			@Override
@@ -95,6 +125,8 @@ public class MainFrame extends JFrame implements INubSelect {
 				
 			}
 		});
+		
+		filePanel.highlight(1);
 	}
 	
 	@Override
@@ -104,26 +136,67 @@ public class MainFrame extends JFrame implements INubSelect {
 	
 	boolean selected = false;
 	int highlighted = 0;
+	
 	private FilesPanel filePanel;
-	private JPanel boundPanel;
+	private ButtonPanel boundPanel;
 	
 	@Override
-	public void HandleCommand(NubCommand nc) {
+	public void handleCommand(NubCommand nc) {
 		switch (highlighted) {
 		case 0: //Files
 			if (selected) {
-				filePanel.HandleCommand(nc);
-				if (nc == NubCommand.Click) {
+				if (nc == NubCommand.Deselect) {
 					selected = false;
+					boundPanel.highlight(1);
+					break;
+				}
+				filePanel.handleCommand(nc);
+				if (nc == NubCommand.Click) {
+					selected = !filePanel.selected;
+					if (!selected) filePanel.highlight(1);
+				}
+			} else {
+				switch (nc) {
+				case Click:
+					selected = true;
+					filePanel.highlight(2);
+					break;
+				case Left:
+				case Right:
+					highlighted = 1;
+					filePanel.highlight(0);
+					boundPanel.highlight(1);
+					break;
+				default:
+					break;
 				}
 			}
-			switch (nc) {
-			case Click:
-				selected = true;
-				break;
-			default:
-				break;
+			break;
+		case 1: //Boundaries
+			if (selected) {
+				if (nc == NubCommand.Deselect) {
+					selected = false;
+					boundPanel.highlight(1);
+					break;
+				}
+				boundPanel.handleCommand(nc);
+			} else {
+				switch (nc) {
+				case Click:
+					selected = true;
+					boundPanel.highlight(2);
+					break;
+				case Left:
+				case Right:
+					highlighted = 0;
+					filePanel.highlight(1);
+					boundPanel.highlight(0);
+					break;
+				default:
+					break;
+				}
 			}
+			break;
 		}
 		
 	}

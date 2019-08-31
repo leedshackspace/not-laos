@@ -55,6 +55,7 @@ public class FilesPanel extends JPanel implements INubSelect {
 	public void backFiles() {
 		List<File> backFiles = new ArrayList<File>();
 		if (rootDir.listFiles() != null) backFiles.addAll(Arrays.asList(rootDir.listFiles()));
+		backFiles.removeIf(f -> f.isHidden() || f.getName().startsWith("."));
 		backFiles.sort(Comparator.comparing(f -> ((File)f).lastModified()).reversed());
 		files = backFiles; //Buffer swap
 		repaint();
@@ -181,12 +182,12 @@ public class FilesPanel extends JPanel implements INubSelect {
 	}
 
 	@Override
-	public void HandleCommand(NubCommand nc) {
+	public void handleCommand(NubCommand nc) {
 		switch (nc) {
-		case Up:
+		case Down:
 			up();
 			break;
-		case Down:
+		case Up:
 			down();
 			break;
 		case Click:

@@ -20,5 +20,5 @@ public interface INubSelect {
 		BR
 	}
 	
-	public void HandleCommand(NubCommand nc);
+	public void handleCommand(NubCommand nc);
 }
