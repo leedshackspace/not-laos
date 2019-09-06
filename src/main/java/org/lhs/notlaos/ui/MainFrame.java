@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.lhs.notlaos.gcode.GCode;
 import org.lhs.notlaos.ui.ButtonPanel.Button;
 
 public class MainFrame extends JFrame implements INubSelect {
@@ -25,6 +26,9 @@ public class MainFrame extends JFrame implements INubSelect {
 	private static final long serialVersionUID = 4022634459164767828L;
 	private JPanel contentPane;
 
+	public GCode selectedGcode = null;
+
+	
 	/**
 	 * Launch the application.
 	 */

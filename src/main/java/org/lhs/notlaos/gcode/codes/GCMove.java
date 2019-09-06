@@ -40,9 +40,14 @@ public class GCMove implements IGCCommand {
 	}
 	
 	public GCMove(boolean interp, Double x, Double y, Double f) {
+		this(interp, x, y, null, f);
+	}
+	
+	public GCMove(boolean interp, Double x, Double y, Double z, Double f) {
 		this.interpolate = interp;
 		this.x = x;
 		this.y = y;
+		this.z = z;
 		this.feed = f;
 	}
 	
