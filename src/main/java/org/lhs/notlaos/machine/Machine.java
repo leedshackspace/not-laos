@@ -5,8 +5,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.fazecast.jSerialComm.SerialPortDataListener;
-import com.fazecast.jSerialComm.SerialPortEvent;
 
 public class Machine {
 
@@ -14,14 +12,32 @@ public class Machine {
 	int baud;
 	SerialPort sp;
 	
-	public Machine(String serial, int baud) {
+	int bedWidth, bedHeight;
+	
+	public Machine(String serial, int baud, int bedWidth, int bedHeight) {
 		this.serial = serial;
 		this.baud = baud;
+		this.bedWidth = bedWidth;
+		this.bedHeight = bedHeight;
+	}
+	
+	public void connect() {
 		sp = SerialPort.getCommPort(serial);
 		sp.openPort();
 		sp.setBaudRate(baud);
 	}
 	
+	
+	public int getBedWidth() {
+		return bedWidth;
+	}
+
+	public int getBedHeight() {
+		return bedHeight;
+	}
+
+
+
 	public void sendRaw(String rawCMD) throws IOException {
 		//System.out.println(rawCMD);
 		try (Writer w = new OutputStreamWriter(sp.getOutputStream())) {

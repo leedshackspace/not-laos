@@ -39,14 +39,14 @@ public class MGCTranslator implements ITranslator {
 				if (line == null || line.equals("")) {
 					return;
 				}
-				switch (line.split(" ", 1)[0]) {
+				switch (line.split(" ", 2)[0]) {
 				case "G0":
 				case "G1":
 					out.append(new GCMove(getValue(line, 'G').equals(0.0), getValue(line, 'X'), getValue(line, 'Y'), getValue(line, 'Z'), getValue(line, 'F')));
 					break;
 				case "M3":
 				case "M5":
-					out.append(new GCPower(getValue(line, 'M').equals(3.0), getValue(line, 'S'), line.contains("I")));
+					out.append(new GCPower(getValue(line, 'M').equals(3.0), getValue(line, 'M').equals(3.0) ? getValue(line, 'S') : 0, line.contains("I")));
 					break;
 				case "G28":
 					boolean any = line.contains("X") || line.contains("Y") || line.contains("Z");
@@ -59,7 +59,7 @@ public class MGCTranslator implements ITranslator {
 			e.printStackTrace();
 			return null;
 		}
-		return null;
+		return out;
 	}
 
 }

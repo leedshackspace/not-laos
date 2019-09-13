@@ -27,4 +27,9 @@ public class GCHome implements IGCCommand {
 		this.Y = Y;
 		this.Z = Z;
 	}
+
+	@Override
+	public String getCommandString() {
+		return "G28" + (X?" X":"") + (Y?" Y":"") + (Z?" Z":"") + "\n";
+	}
 }

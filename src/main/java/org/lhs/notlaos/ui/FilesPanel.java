@@ -67,11 +67,16 @@ public class FilesPanel extends JPanel implements INubSelect {
 	boolean selected = false;
 	int highlight = 0;
 	
+	public File getSelectedFile() {
+		return files.get(tgtIndex);
+	}
+	
 	/**
 	 * Move selection cursor up
 	 */
 	public void up() {
 		tgtIndex = Math.min(tgtIndex+1, files.size()-1);
+		selected = false;
 		repaint();
 	}
 	
@@ -80,6 +85,7 @@ public class FilesPanel extends JPanel implements INubSelect {
 	 */
 	public void down() {
 		tgtIndex = Math.max(tgtIndex-1, 0);
+		selected = false;
 		repaint();
 	}
 	

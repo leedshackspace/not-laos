@@ -12,7 +12,7 @@ public class GCodeWriter extends Writer {
 	}
 	
 	public void write(IGCCommand igc) throws IOException {
-		write(igc.toString());
+		write(igc.getCommandString());
 	}
 	
 	public void write(GCode gc) throws IOException {

@@ -4,7 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,19 +19,19 @@ public class ButtonPanel extends JPanel implements INubSelect
 	
 	int inset = 5;
 	
-	List<Button> btns;
+	List<IButton> btns;
 	
 	int preferedWidth = 200;
 	
 	public ButtonPanel() {
-		this.btns = new ArrayList<ButtonPanel.Button>();
+		this.btns = new ArrayList<ButtonPanel.IButton>();
 		this.btns.add(new Button(1, "Test", () -> System.out.println("HELLO")));
 		this.btns.add(new Button(2, "SuperLongTest90", () -> System.out.println("HELLO")));
 		init();
 	}
 	
-	public ButtonPanel(List<Button> btns) {
-		this.btns = btns;
+	public ButtonPanel(List<IButton> btns) {
+		this.btns = new ArrayList<>(btns);
 		init();
 	}
 	
@@ -37,11 +40,11 @@ public class ButtonPanel extends JPanel implements INubSelect
 		preferedWidth = 200;
 		btns.stream() // Itterate over buttons
 		.mapToInt(
-				b -> (this.getFontMetrics(getFont()).stringWidth(b.text)+inset*4)/b.width // Get String length per unit button width
+				b -> (this.getFontMetrics(getFont()).stringWidth(b.getText())+inset*4)/b.getWidth() // Get String length per unit button width
 		)
 		.max() // Find maximum
 		.ifPresent(
-				i -> preferedWidth = i * btns.stream().mapToInt(j->j.width).sum()
+				i -> preferedWidth = i * btns.stream().mapToInt(j->j.getWidth()).sum()
 		);
 	}
 
@@ -61,6 +64,8 @@ public class ButtonPanel extends JPanel implements INubSelect
 	public Dimension getPreferredSize() {
 		return new Dimension(preferedWidth, getFontMetrics(getFont()).getHeight() + inset*4);
 	}
+	
+	private List<Rectangle> buttonCollisions;
 	
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -98,42 +103,89 @@ public class ButtonPanel extends JPanel implements INubSelect
 	}
 	
 	public void drawButtons(Graphics2D g2) {
-		int step = (getWidth()-inset*3)/(btns.stream().mapToInt(i->i.width).sum());
+		int step = (getWidth()-inset*3)/(btns.stream().mapToInt(i->i.getWidth()).sum());
 		
 		int curstep = 0;
 		
 		int btnHeight = getHeight()-4*inset;
 		int idx = 0;
 		
-		for (Button btn : btns) {
+		buttonCollisions = new ArrayList<>();
+		
+		for (IButton btn : btns) {
 			int btnOrigin = inset + step*curstep;
-			int btnWidth = step*btn.width - inset;
+			int btnWidth = step*btn.getWidth() - inset;
 			
 			
 			
 			if (selected == idx) {
-				System.out.println("HAI");
 				if (press) {
 					g2.setColor(UIGlobals.SelFG);
-					System.out.println("HAI2");
 					
 				} else {
 					g2.setColor(UIGlobals.TrimFG);
-					System.out.println("HAI1");
 				}
 			} else {
 				g2.setColor(UIGlobals.NormFG);
 			}
 			g2.drawRoundRect(btnOrigin, inset, btnWidth, btnHeight, 5, 5);
 			
-			g2.drawString(btn.text, btnOrigin + btnWidth/2 - g2.getFontMetrics().stringWidth(btn.text)/2, inset + g2.getFontMetrics().getAscent());
-			curstep += btn.width;
+			buttonCollisions.add(new Rectangle(btnOrigin+inset, inset+inset, btnWidth, btnHeight));
+			
+			g2.drawString(btn.getText(), btnOrigin + btnWidth/2 - g2.getFontMetrics().stringWidth(btn.getText())/2, inset + g2.getFontMetrics().getAscent());
+			curstep += btn.getWidth();
 			
 			idx++;
 		}
 	}
 	
-	public static class Button {
+	{
+		addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				for (int i = 0; i < buttonCollisions.size(); i++) {
+					if (buttonCollisions.get(i).contains(e.getPoint())) {
+						selected = i;
+						handleCommand(NubCommand.Click);
+					}
+				}
+			}
+		});
+	}
+	
+	public static interface IButton {
+		
+		public int getWidth();
+		
+		public String getText();
+		
+		public void click();
+		
+	}
+	
+	public static class Button implements IButton {
 		int width;
 		String text;
 		Runnable action;
@@ -143,6 +195,21 @@ public class ButtonPanel extends JPanel implements INubSelect
 			this.width = width;
 			this.text = text;
 			this.action = action;
+		}
+
+		@Override
+		public int getWidth() {
+			return width;
+		}
+
+		@Override
+		public String getText() {
+			return text;
+		}
+
+		@Override
+		public void click() {
+			if (action != null) action.run();
 		}
 		
 	}
@@ -161,7 +228,7 @@ public class ButtonPanel extends JPanel implements INubSelect
 			System.out.println("Starting Click");
 			press = true;
 			redrawButton(selected);
-			if (btns.get(selected).action != null) btns.get(selected).action.run();
+			btns.get(selected).click();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {

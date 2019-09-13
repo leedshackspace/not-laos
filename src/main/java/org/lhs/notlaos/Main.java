@@ -11,8 +11,6 @@ import java.util.List;
 
 import org.lhs.notlaos.gcode.GCode;
 import org.lhs.notlaos.gcode.GCodeWriter;
-import org.lhs.notlaos.gcode.IGCCommand;
-import org.lhs.notlaos.machine.Machine;
 import org.lhs.notlaos.translation.LGCTranslator;
 import org.lhs.notlaos.translation.server.TFTPServer;
 import org.lhs.notlaos.translation.server.TFTPServer.ServerMode;
@@ -40,10 +38,6 @@ public class Main {
 					outFile.createNewFile();
 					try (GCodeWriter br = new GCodeWriter(new FileWriter(outFile))) {
 						br.write(gcode);
-					}
-					Machine m = new Machine("COM14", 1000000);
-					for (IGCCommand igc : gcode) {
-						m.sendRaw(igc.toString());
 					}
 					created.add(outFile);
 				}

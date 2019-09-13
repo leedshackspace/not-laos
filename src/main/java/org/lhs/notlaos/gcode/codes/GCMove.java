@@ -67,8 +67,7 @@ public class GCMove implements IGCCommand {
 		return feed;
 	}
 	
-	@Override
-	public String toString() {
+	public String getCommandString() {
 		return (interpolate ? "G1 " : "G0 ") 
 				+ (x == null ? "" : ("X"+df.format(x)+" "))
 				+ (y == null ? "" : ("Y"+df.format(y)+" "))

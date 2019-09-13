@@ -19,7 +19,7 @@ public class GCPower implements IGCCommand {
 	//Decimal format with um precision
 	private static DecimalFormat df = new DecimalFormat("#.###");
 	
-	private double pow = 0;
+	private double pow = 0.0;
 	private boolean on = false;
 	private boolean inline = true; // Where firmware supported
 	
@@ -45,8 +45,7 @@ public class GCPower implements IGCCommand {
 		return on;
 	}
 	
-	@Override
-	public String toString() {
+	public String getCommandString() {
 		return (on ? "M3 S" + df.format(pow) + (inline ?  " I \n" : " \n") : (inline ? "M5 I\n" : "M5\n"));
 	}
 }
