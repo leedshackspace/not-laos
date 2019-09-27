@@ -3,10 +3,14 @@ package org.lhs.notlaos.machine;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Deque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 
-public class Machine {
+public class Machine implements SerialPortDataListener {
 
 	String serial;
 	int baud;
@@ -25,6 +29,16 @@ public class Machine {
 		sp = SerialPort.getCommPort(serial);
 		sp.openPort();
 		sp.setBaudRate(baud);
+		sp.addDataListener(this);
+	}
+	
+	public boolean isOpen() { 
+		return sp.isOpen();
+	}
+	
+	public void disconnect() {
+		sp.closePort();
+		sp.removeDataListener();
 	}
 	
 	
@@ -36,34 +50,38 @@ public class Machine {
 		return bedHeight;
 	}
 
-
-
-	public void sendRaw(String rawCMD) throws IOException {
-		//System.out.println(rawCMD);
-		try (Writer w = new OutputStreamWriter(sp.getOutputStream())) {
-			w.write(rawCMD);
-		}
-		pollRead();
+	public void send(String rawCMD) throws IOException {
+		//TODO
+		sp.writeBytes(rawCMD.getBytes(), rawCMD.getBytes().length);
 	}
 	
-	public void pollRead() {
-		byte[] recv = new byte[sp.bytesAvailable()];
-		sp.readBytes(recv, recv.length);
-		//System.out.println(new String(recv));
-		currentLine.append(new String(recv));
-		if (currentLine.toString().contains("\n")) {
-			lastFullLine = currentLine.toString().split("\n", 1)[0];
-			currentLine = new StringBuilder(currentLine.toString().split("\n", 1).length == 2 ? currentLine.toString().split("\n", 1)[1] : "");
-			if (!isClearToSend()) {
-				System.out.println(lastFullLine);
-			}
-		}
+	public String getResponse(boolean consume) {
+		return consume ? responses.removeFirst() : responses.peekFirst();
 	}
 	
-	private String lastFullLine = "";
-	private StringBuilder currentLine = new StringBuilder();
+	Deque<String> responses = new LinkedBlockingDeque<String>();	
 	
-	public boolean isClearToSend() {
-		return lastFullLine.equals("") || lastFullLine.contains("ok");
+
+	@Override
+	public int getListeningEvents() {
+		return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+	}
+
+	@Override
+	public void serialEvent(SerialPortEvent event) {
+		if ((event.getEventType() & getListeningEvents()) != getListeningEvents()) {
+			return;
+		}
+		
+		int bytesAvaliable = sp.bytesAvailable();
+		if (bytesAvaliable <= 0) {
+			return;
+		}
+		
+		byte[] tmp = new byte[1024 + bytesAvaliable];
+		int count = sp.readBytes(tmp, tmp.length);
+		String response = new String(tmp, 0, count);
+		
+		responses.add(response);
 	}
 }

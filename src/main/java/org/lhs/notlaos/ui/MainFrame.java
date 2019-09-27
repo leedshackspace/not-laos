@@ -82,7 +82,7 @@ public class MainFrame extends JFrame implements INubSelect {
 		
 		
 		List<IButton> buttons = new ArrayList<IButton>();
-		buttons.add(new Button(2, "Move", () -> System.out.println("Move")));
+		buttons.add(new Button(2, "Move", () -> { System.out.println("Move"); currentMode = Mode.MOVE; active = true; paintComponents(getGraphics());}));
 		buttons.add(new Button(3, "Set Origin", () -> System.out.println("Set Origin")));
 		buttons.add(new Button(3, "Boundaries", () -> System.out.println("Bounds")));
 		buttons.add(new Button(4, "Origin Mode", null));
@@ -154,6 +154,17 @@ public class MainFrame extends JFrame implements INubSelect {
 	@Override
 	public void paintComponents(Graphics g) {
 		super.paintComponents(g);
+		switch (currentMode) {
+		case MOVE:
+			System.out.println("Hello there");
+			g.setColor(new Color(5, 5, 5, 75));
+			g.fillRect(0, 0, getWidth(), getHeight());
+			g.setColor(new Color(25, 25, 25, 255));
+			g.drawString("Move using the nub", getWidth()/2, getHeight()/2);
+			break;
+		default:
+			break;
+		}
 	}
 	
 	boolean selected = false;
@@ -164,120 +175,167 @@ public class MainFrame extends JFrame implements INubSelect {
 	private ButtonPanel cutPanel;
 	private PreviewPanel previewPanel;
 	
+	private static enum Mode {
+		NONE,
+		MOVE
+	}
+	
+	private Mode currentMode = Mode.NONE;
+	private boolean active = false;
+	
 	@Override
 	public void handleCommand(NubCommand nc) {
-		switch (highlighted) {
-		case 0: //Files
-			if (selected) {
-				if (nc == NubCommand.Deselect) {
-					selected = false;
-					boundPanel.highlight(1);
-					break;
-				}
-				filePanel.handleCommand(nc);
-				if (nc == NubCommand.Click) {
-					selected = !filePanel.selected;
-					if (!selected) {
-						filePanel.highlight(1);
-						
-					}
-				}
-				if (filePanel.selected) {
-					try {
-						this.selectedGcode = new MGCTranslator().translate(new FileInputStream(filePanel.getSelectedFile()));
-						previewPanel.setVector(this.selectedGcode.getVector(new Vector3f(), Color.BLUE, Color.RED));
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-				} else {
-					this.selectedGcode = null;
-					previewPanel.setVector(new ArrayList<>());
-				}
+		if (active) {
+			if (nc == NubCommand.Deselect) {
+				active = false;
+				paintAll(getGraphics());
+				return;
 			} else {
-				switch (nc) {
-				case Click:
-					selected = true;
-					filePanel.highlight(2);
-					break;
-				case Left:
-				case Right:
-					highlighted = 1;
-					filePanel.highlight(0);
-					boundPanel.highlight(1);
+				switch (currentMode) {
+				case MOVE:
+					handleCommandMove(nc);
 					break;
 				default:
-					break;
+					active = false;
+					paintAll(getGraphics());
+					return;
 				}
 			}
-			break;
-		case 1: //Boundaries
-			if (nc == NubCommand.Down) {
-				selected = false;
+		}
+		else {
+			switch (highlighted) {
+			case 0: //Files
+				handleCommandFiles(nc);
+				break;
+			case 1: //Boundaries
+				handleCommandBounds(nc);
+				break;
+			case 2: //Cut
+				handleCommandCut(nc);
+				break;
 			}
-			if (selected) {
-				if (nc == NubCommand.Deselect) {
-					selected = false;
-					boundPanel.highlight(1);
-					break;
-				}
-				boundPanel.handleCommand(nc);
-			} else {
-				switch (nc) {
-				case Click:
-					selected = true;
-					boundPanel.highlight(2);
-					break;
-				case Left:
-				case Right:
-					highlighted = 0;
-					filePanel.highlight(1);
-					boundPanel.highlight(0);
-					break;
-				case Down:
-					highlighted = 2;
-					cutPanel.highlight(1);
-					boundPanel.highlight(0);
-					break;
-				default:
-					break;
-				}
-			}
-			break;
-		case 2: //Cut
-			if (nc == NubCommand.Up) {
-				selected = false;
-			}
-			if (selected) {
-				if (nc == NubCommand.Deselect) {
-					selected = false;
-					cutPanel.highlight(1);
-					break;
-				}
-				cutPanel.handleCommand(nc);
-			} else {
-				switch (nc) {
-				case Click:
-					selected = true;
-					cutPanel.highlight(2);
-					break;
-				case Left:
-				case Right:
-					highlighted = 0;
-					filePanel.highlight(1);
-					cutPanel.highlight(0);
-					break;
-				case Up:
-					highlighted = 1;
-					boundPanel.highlight(1);
-					cutPanel.highlight(0);
-					break;
-				default:
-					break;
-				}
-			}
-			break;
 		}
 		
+	}
+	
+	int lastMoveX, lastMoveY;
+	
+	private void handleCommandMove(NubCommand nc) {
+		switch (nc) {
+			//TODO
+		}
+	}
+
+	private void handleCommandFiles(NubCommand nc) {
+		if (selected) {
+			if (nc == NubCommand.Deselect) {
+				selected = false;
+				boundPanel.highlight(1);
+				return;
+			}
+			filePanel.handleCommand(nc);
+			if (nc == NubCommand.Click) {
+				selected = !filePanel.selected;
+				if (!selected) {
+					filePanel.highlight(1);
+					
+				}
+			}
+			if (filePanel.selected) {
+				try {
+					this.selectedGcode = new MGCTranslator().translate(new FileInputStream(filePanel.getSelectedFile()));
+					previewPanel.setVector(this.selectedGcode.getVector(new Vector3f(), Color.BLUE, Color.RED));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			} else {
+				this.selectedGcode = null;
+				previewPanel.setVector(new ArrayList<>());
+			}
+		} else {
+			switch (nc) {
+			case Click:
+				selected = true;
+				filePanel.highlight(2);
+				break;
+			case Left:
+			case Right:
+				highlighted = 1;
+				filePanel.highlight(0);
+				boundPanel.highlight(1);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	private void handleCommandBounds(NubCommand nc) {
+		if (nc == NubCommand.Down) {
+			selected = false;
+		}
+		if (selected) {
+			if (nc == NubCommand.Deselect) {
+				selected = false;
+				boundPanel.highlight(1);
+				return;
+			}
+			boundPanel.handleCommand(nc);
+		} else {
+			switch (nc) {
+			case Click:
+				selected = true;
+				boundPanel.highlight(2);
+				break;
+			case Left:
+			case Right:
+				highlighted = 0;
+				filePanel.highlight(1);
+				boundPanel.highlight(0);
+				break;
+			case Down:
+				highlighted = 2;
+				cutPanel.highlight(1);
+				boundPanel.highlight(0);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	private void handleCommandCut(NubCommand nc) {
+		if (nc == NubCommand.Up) {
+			selected = false;
+		}
+		if (selected) {
+			if (nc == NubCommand.Deselect) {
+				selected = false;
+				cutPanel.highlight(1);
+				return;
+			}
+			cutPanel.handleCommand(nc);
+		} else {
+			switch (nc) {
+			case Click:
+				selected = true;
+				cutPanel.highlight(2);
+				break;
+			case Left:
+			case Right:
+				highlighted = 0;
+				filePanel.highlight(1);
+				cutPanel.highlight(0);
+				break;
+			case Up:
+				highlighted = 1;
+				boundPanel.highlight(1);
+				cutPanel.highlight(0);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 }
